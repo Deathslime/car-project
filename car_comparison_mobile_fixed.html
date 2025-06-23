@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Used Car Comparison - Mobile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 15px;
+            color: white;
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .summary-stats {
+            background: white;
+            margin: 0;
+            padding: 20px 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px 10px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .flags-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .flag-count {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 8px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .flag-excellent { background: #c6f6d5; color: #22543d; }
+        .flag-good { background: #bee3f8; color: #2a4365; }
+        .flag-risk { background: #fed7d7; color: #742a2a; }
+        .flag-overpriced { background: #feebc8; color: #744210; }
+
+        .view-toggle {
+            background: white;
+            padding: 15px;
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .toggle-btn {
+            flex: 1;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            padding: 18px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .toggle-btn.active {
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .toggle-btn:active,
+        .toggle-btn:focus {
+            transform: scale(0.98);
+            outline: none;
+        }
+
+        .cars-container {
+            padding: 0;
+        }
+
+        .car-card {
+            background: white;
+            margin: 0 0 1px 0;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .car-header {
+            padding: 20px 15px 15px 15px;
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: white;
+            position: relative;
+        }
+
+        .evaluation-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-excellent { background: #38a169; }
+        .badge-good { background: #3182ce; }
+        .badge-risk { background: #e53e3e; }
+        .badge-overpriced { background: #dd6b20; }
+
+        .car-title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            padding-right: 100px;
+            line-height: 1.3;
+        }
+
+        .car-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #68d391;
+        }
+
+        .car-details {
+            padding: 20px 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            width: 35%;
+        }
+
+        .detail-value {
+            color: #2d3748;
+            font-size: 0.9rem;
+            text-align: right;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .features-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #f1f5f9;
+        }
+
+        .features-title {
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .feature-tag {
+            background: #edf2f7;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .car-actions {
+            padding: 15px;
+            background: #f8fafc;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 18px 12px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .action-btn:active,
+        .action-btn:focus {
+            transform: scale(0.95);
+            outline: none;
+        }
+
+        .table-view {
+            display: none;
+            background: white;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            min-width: 800px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+
+        .comparison-table th {
+            background: #2d3748;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .table-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .table-btn {
+            padding: 12px 16px;
+            background: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .table-btn:active,
+        .table-btn:focus {
+            transform: scale(0.95);
+            outline: none;
+        }
+
+        .notes-section {
+            margin: 20px 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .notes-section h3 {
+            margin-bottom: 15px;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        .notes-section p {
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #4a5568;
+        }
+
+        .notes-section strong {
+            color: #2d3748;
+        }
+
+        .table-scroll-hint {
+            text-align: center;
+            padding: 10px;
+            background: #f0f4f8;
+            color: #4a5568;
+            font-size: 0.8rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Improved touch targets for mobile */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .stat-number {
+                font-size: 1.2rem;
+            }
+            
+            .car-title {
+                font-size: 1rem;
+            }
+            
+            .car-price {
+                font-size: 1.6rem;
+            }
+            
+            .detail-label,
+            .detail-value {
+                font-size: 0.85rem;
+            }
+            
+            .action-btn {
+                padding: 20px 12px;
+                font-size: 0.9rem;
+                min-height: 48px;
+            }
+            
+            .toggle-btn {
+                padding: 20px 15px;
+                font-size: 0.9rem;
+                min-height: 48px;
+            }
+
+            .table-btn {
+                padding: 14px 18px;
+                font-size: 0.85rem;
+                min-height: 44px;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .toggle-btn:focus-visible,
+        .action-btn:focus-visible,
+        .table-btn:focus-visible {
+            outline: 2px solid #4299e1;
+            outline-offset: 2px;
+        }
+
+        /* Hide elements properly */
+        .hidden {
+            display: none !important;
+        }
+
+        .visible {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Car Comparison</h1>
+            <p>11 vehicles analyzed with smart evaluation</p>
+        </div>
+
+        <div class="summary-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">11</div>
+                    <div class="stat-label">Total Cars</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$7,995<br>$15,000</div>
+                    <div class="stat-label">Price Range</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$11,808</div>
+                    <div class="stat-label">Avg Price</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">81,542</div>
+                    <div class="stat-label">Avg Miles</div>
+                </div>
+            </div>
+            
+            <div class="flags-summary">
+                <div class="flag-count flag-excellent">
+                    <span>🟢</span>
+                    <span>3 Excellent</span>
+                </div>
+                <div class="flag-count flag-good">
+                    <span>🔵</span>
+                    <span>3 Good</span>
+                </div>
+                <div class="flag-count flag-risk">
+                    <span>🔴</span>
+                    <span>3 Risks</span>
+                </div>
+                <div class="flag-count flag-overpriced">
+                    <span>🟡</span>
+                    <span>2 Overpriced</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="view-toggle">
+            <button class="toggle-btn active" id="card-btn" type="button">
+                📱 Cards
+            </button>
+            <button class="toggle-btn" id="table-btn" type="button">
+                📊 Table
+            </button>
+        </div>
+
+        <div id="card-view" class="cars-container visible">
+            <!-- Car 1: 1999 Mercedes-Benz SL-Class -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-good">Good Deal</div>
+                    <div class="car-title">1999 Mercedes-Benz SL-Class Base</div>
+                    <div class="car-price">$14,499</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">69,000 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Midwest Motors<br><small>Dealer</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Grimes, IA</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Warranty</span>
+                        <span class="detail-value">Available</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">Convertible</span>
+                            <span class="feature-tag">Leather</span>
+                            <span class="feature-tag">BOSE Sound</span>
+                            <span class="feature-tag">Heated Seats</span>
+                            <span class="feature-tag">5.0L V8</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.cars.com/vehicledetail/54e6f5ad-b076-4f86-bdfa-23db45497bc4/">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">AutoCheck</button>
+                </div>
+            </div>
+
+            <!-- Car 2: 2000 Mercedes-Benz SL 500 -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-excellent">Excellent</div>
+                    <div class="car-title">2000 Mercedes-Benz SL 500</div>
+                    <div class="car-price">$11,995</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">55,144 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Prestige Auto<br><small>⭐5.0 (288 reviews)</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Phoenix, AZ</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">Low Miles</span>
+                            <span class="feature-tag">5.0L V8</span>
+                            <span class="feature-tag">Ash Leather</span>
+                            <span class="feature-tag">5-Speed Auto</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.autotrader.com/cars-for-sale/vehicle/687999959">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">History</button>
+                </div>
+            </div>
+
+            <!-- Car 3: 1998 Mercedes-Benz SL-Class -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-excellent">Excellent</div>
+                    <div class="car-title">1998 Mercedes-Benz SL-Class SL 500</div>
+                    <div class="car-price">$11,000</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">74,000 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Justin L<br><small>Private</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Lake Worth, FL</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value">Verified Vehicle</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">Verified</span>
+                            <span class="feature-tag">5.0L V8</span>
+                            <span class="feature-tag">Low Miles</span>
+                            <span class="feature-tag">Black Leather</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.autotrader.com/cars-for-sale/vehicle/749498028">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">History</button>
+                </div>
+            </div>
+
+            <!-- Car 4: 2001 Mercedes-Benz SL-Class -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-risk">Risk</div>
+                    <div class="car-title">2001 Mercedes-Benz SL-Class SL 500</div>
+                    <div class="car-price">$13,998</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">85,125 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Owners</span>
+                        <span class="detail-value">4 previous</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Calidad Motors<br><small>Dealer</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Warranty</span>
+                        <span class="detail-value">3mo/3000mi</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">302 HP V8</span>
+                            <span class="feature-tag">Bose Sound</span>
+                            <span class="feature-tag">Power Seats</span>
+                            <span class="feature-tag">Safety</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.cargurus.com/Cars/inventorylisting/vdp.action?listingId=419622139">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">History</button>
+                </div>
+            </div>
+
+            <!-- Car 5: 1998 Mercedes-Benz SL500 Roadster -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-risk">Risk</div>
+                    <div class="car-title">1998 Mercedes-Benz SL500 Roadster</div>
+                    <div class="car-price">$7,995</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">121,330 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">At least 1</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">NOVA Autoland<br><small>Dealer</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Chantilly, VA</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Price</span>
+                        <span class="detail-value">Reduced $2,000</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">4mo Warranty</span>
+                            <span class="feature-tag">Tan Interior</span>
+                            <span class="feature-tag">Memory Seat</span>
+                            <span class="feature-tag">Premium Sound</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.cars.com/vehicledetail/2306f27c-a40b-4c62-acd8-e49455f28742/">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">CARFAX</button>
+                </div>
+            </div>
+
+            <!-- Car 6: 1996 Chevrolet Corvette -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-good">Good Deal</div>
+                    <div class="car-title">1996 Chevrolet Corvette Base</div>
+                    <div class="car-price">$12,499</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">78,704 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Trans</span>
+                        <span class="detail-value">Manual</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">I-80 Auto Sales<br><small>Dealer</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Hazel Crest, IL</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">330HP V8</span>
+                            <span class="feature-tag">Manual</span>
+                            <span class="feature-tag">Sunroof</span>
+                            <span class="feature-tag">Leather</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.cars.com/vehicledetail/8d890b73-b7ed-4baa-86c0-37e3a4e9312d/">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">AutoCheck</button>
+                </div>
+            </div>
+
+            <!-- Car 7: 1995 Chevrolet Corvette -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-risk">Risk</div>
+                    <div class="car-title">1995 Chevrolet Corvette Base</div>
+                    <div class="car-price">$9,900</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Engine</span>
+                        <span class="detail-value">5,000 mi (rebuilt)</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Car Miles</span>
+                        <span class="detail-value">206,000 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">At least 1</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Mark<br><small>Private</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Price</span>
+                        <span class="detail-value">Reduced $2,600</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">Rebuilt Engine</span>
+                            <span class="feature-tag">6-Speed Manual</span>
+                            <span class="feature-tag">New AC</span>
+                            <span class="feature-tag">New Tires</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.cars.com/vehicledetail/1822675a-49f0-43a1-befa-a3fd07ae3c78/">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">AutoCheck</button>
+                </div>
+            </div>
+
+            <!-- Car 8: 1996 Chevrolet Corvette Coupe 2D (Brett K) -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-overpriced">Overpriced</div>
+                    <div class="car-title">1996 Chevrolet Corvette Coupe 2D</div>
+                    <div class="car-price">$15,000</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">86,000 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Trans</span>
+                        <span class="detail-value">4-Speed Auto</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Brett K<br><small>Private</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">West Islip, NY</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">Verified</span>
+                            <span class="feature-tag">5.7L V8</span>
+                            <span class="feature-tag">Black Leather</span>
+                            <span class="feature-tag">Low Miles</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/694775524">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">History</button>
+                </div>
+            </div>
+
+            <!-- Car 9: 1996 Chevrolet Corvette Coupe 2D (Toby B) -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-overpriced">Overpriced</div>
+                    <div class="car-title">1996 Chevrolet Corvette Coupe 2D</div>
+                    <div class="car-price">$15,000</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">92,280 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Trans</span>
+                        <span class="detail-value">4-Speed Auto</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Toby B<br><small>Private</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Roswell, NM</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">Verified</span>
+                            <span class="feature-tag">5.7L V8</span>
+                            <span class="feature-tag">Tan Leather</span>
+                            <span class="feature-tag">Low Miles</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/748232963">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">History</button>
+                </div>
+            </div>
+
+            <!-- Car 10: 1995 Chevrolet Corvette Coupe 2D (Jacob R) -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-excellent">Excellent</div>
+                    <div class="car-title">1995 Chevrolet Corvette Coupe 2D</div>
+                    <div class="car-price">$9,000</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">86,575 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">KBB Rating</span>
+                        <span class="detail-value">GOOD PRICE</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">None reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">Jacob R<br><small>Private</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Mantua, NJ</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">Verified</span>
+                            <span class="feature-tag">5.7L V8</span>
+                            <span class="feature-tag">Black Leather</span>
+                            <span class="feature-tag">Lowest Price</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/751051724">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">History</button>
+                </div>
+            </div>
+
+            <!-- Car 11: 1995 Chevrolet Corvette Coupe -->
+            <div class="car-card">
+                <div class="car-header">
+                    <div class="evaluation-badge badge-risk">Risk</div>
+                    <div class="car-title">1995 Chevrolet Corvette Coupe</div>
+                    <div class="car-price">$9,990</div>
+                </div>
+                <div class="car-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Mileage</span>
+                        <span class="detail-value">76,373 mi</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">KBB Rating</span>
+                        <span class="detail-value">GOOD PRICE</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Accidents</span>
+                        <span class="detail-value">Damage reported</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Seller</span>
+                        <span class="detail-value">CW Cars<br><small>⭐5.0 (47 reviews)</small></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">Green Bay, WI</span>
+                    </div>
+                    <div class="features-section">
+                        <div class="features-title">Key Features</div>
+                        <div class="features">
+                            <span class="feature-tag">High-Rated Dealer</span>
+                            <span class="feature-tag">5.7L V8</span>
+                            <span class="feature-tag">Black Leather</span>
+                            <span class="feature-tag">Automatic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="car-actions">
+                    <button class="action-btn btn-primary" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/746224459">View Listing</button>
+                    <button class="action-btn btn-secondary" type="button">History</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="table-view" class="table-view hidden">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Price</th>
+                        <th>Miles</th>
+                        <th>Year</th>
+                        <th>Accidents</th>
+                        <th>Seller</th>
+                        <th>Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1999 Mercedes SL-Class</strong><br><small>Base</small></td>
+                        <td><strong>$14,499</strong></td>
+                        <td>69,000</td>
+                        <td>1999</td>
+                        <td>None</td>
+                        <td>Midwest Motors<br><small>Dealer</small></td>
+                        <td><span class="table-badge badge-good">Good</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.cars.com/vehicledetail/54e6f5ad-b076-4f86-bdfa-23db45497bc4/">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>2000 Mercedes SL 500</strong><br><small>500</small></td>
+                        <td><strong>$11,995</strong></td>
+                        <td>55,144</td>
+                        <td>2000</td>
+                        <td>None</td>
+                        <td>Prestige Auto<br><small>⭐5.0</small></td>
+                        <td><span class="table-badge badge-excellent">Excellent</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.autotrader.com/cars-for-sale/vehicle/687999959">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1998 Mercedes SL-Class</strong><br><small>SL 500 Roadster</small></td>
+                        <td><strong>$11,000</strong></td>
+                        <td>74,000</td>
+                        <td>1998</td>
+                        <td>None</td>
+                        <td>Justin L<br><small>Private</small></td>
+                        <td><span class="table-badge badge-excellent">Excellent</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.autotrader.com/cars-for-sale/vehicle/749498028">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>2001 Mercedes SL-Class</strong><br><small>SL 500</small></td>
+                        <td><strong>$13,998</strong></td>
+                        <td>85,125</td>
+                        <td>2001</td>
+                        <td>None</td>
+                        <td>Calidad Motors<br><small>Dealer</small></td>
+                        <td><span class="table-badge badge-risk">Risk</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.cargurus.com/Cars/inventorylisting/vdp.action?listingId=419622139">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1998 Mercedes SL500</strong><br><small>Roadster</small></td>
+                        <td><strong>$7,995</strong></td>
+                        <td>121,330</td>
+                        <td>1998</td>
+                        <td>At least 1</td>
+                        <td>NOVA Autoland<br><small>Dealer</small></td>
+                        <td><span class="table-badge badge-risk">Risk</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.cars.com/vehicledetail/2306f27c-a40b-4c62-acd8-e49455f28742/">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1996 Chevrolet Corvette</strong><br><small>Base</small></td>
+                        <td><strong>$12,499</strong></td>
+                        <td>78,704</td>
+                        <td>1996</td>
+                        <td>None</td>
+                        <td>I-80 Auto Sales<br><small>Dealer</small></td>
+                        <td><span class="table-badge badge-good">Good</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.cars.com/vehicledetail/8d890b73-b7ed-4baa-86c0-37e3a4e9312d/">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1995 Chevrolet Corvette</strong><br><small>Base</small></td>
+                        <td><strong>$9,900</strong></td>
+                        <td>5,000 (rebuilt)</td>
+                        <td>1995</td>
+                        <td>At least 1</td>
+                        <td>Mark<br><small>Private</small></td>
+                        <td><span class="table-badge badge-risk">Risk</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.cars.com/vehicledetail/1822675a-49f0-43a1-befa-a3fd07ae3c78/">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1996 Chevrolet Corvette</strong><br><small>Coupe 2D</small></td>
+                        <td><strong>$15,000</strong></td>
+                        <td>86,000</td>
+                        <td>1996</td>
+                        <td>None</td>
+                        <td>Brett K<br><small>Private</small></td>
+                        <td><span class="table-badge badge-overpriced">Overpriced</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/694775524">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1996 Chevrolet Corvette</strong><br><small>Coupe 2D</small></td>
+                        <td><strong>$15,000</strong></td>
+                        <td>92,280</td>
+                        <td>1996</td>
+                        <td>None</td>
+                        <td>Toby B<br><small>Private</small></td>
+                        <td><span class="table-badge badge-overpriced">Overpriced</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/748232963">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1995 Chevrolet Corvette</strong><br><small>Coupe 2D</small></td>
+                        <td><strong>$9,000</strong></td>
+                        <td>86,575</td>
+                        <td>1995</td>
+                        <td>None</td>
+                        <td>Jacob R<br><small>Private</small></td>
+                        <td><span class="table-badge badge-excellent">Excellent</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/751051724">View</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1995 Chevrolet Corvette</strong><br><small>Coupe</small></td>
+                        <td><strong>$9,990</strong></td>
+                        <td>76,373</td>
+                        <td>1995</td>
+                        <td>Reported</td>
+                        <td>CW Cars<br><small>⭐5.0</small></td>
+                        <td><span class="table-badge badge-risk">Risk</span></td>
+                        <td><button class="table-btn" type="button" data-url="https://www.kbb.com/cars-for-sale/vehicle/746224459">View</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="table-scroll-hint">
+                ← Swipe left/right to see more columns →
+            </div>
+        </div>
+
+        <div class="notes-section">
+            <h3>🔍 Smart Evaluation Guide</h3>
+            <p><strong>🟢 Excellent Deals (3):</strong> Best value for money with low mileage, clean history, and competitive pricing. The 2000 Mercedes SL 500 is the standout choice.</p>
+            <p><strong>🔵 Good Deals (3):</strong> Solid choices with fair pricing and good features. The 1996 Corvette with manual transmission is great for enthusiasts.</p>
+            <p><strong>🔴 Potential Risks (3):</strong> Have concerning factors like accident history or multiple owners, but may offer value if you accept the risks.</p>
+            <p><strong>🟡 Overpriced (2):</strong> Both 1996 Corvettes at $15,000 seem high for automatic transmissions and their mileage compared to market rates.</p>
+        </div>
+    </div>
+
+    <script>
+        // Improved mobile-compatible JavaScript
+        (function() {
+            'use strict';
+            
+            // Get elements
+            const cardBtn = document.getElementById('card-btn');
+            const tableBtn = document.getElementById('table-btn');
+            const cardView = document.getElementById('card-view');
+            const tableView = document.getElementById('table-view');
+            
+            // Ensure elements exist
+            if (!cardBtn || !tableBtn || !cardView || !tableView) {
+                console.error('Required elements not found');
+                return;
+            }
+            
+            // Show cards function
+            function showCards(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
+                // Update views
+                cardView.classList.remove('hidden');
+                cardView.classList.add('visible');
+                tableView.classList.remove('visible');
+                tableView.classList.add('hidden');
+                
+                // Update buttons
+                cardBtn.classList.add('active');
+                tableBtn.classList.remove('active');
+                
+                // Haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate(10);
+                }
+                
+                return false;
+            }
+            
+            // Show table function
+            function showTable(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
+                // Update views
+                cardView.classList.remove('visible');
+                cardView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                tableView.classList.add('visible');
+                
+                // Update buttons
+                cardBtn.classList.remove('active');
+                tableBtn.classList.add('active');
+                
+                // Haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate(10);
+                }
+                
+                return false;
+            }
+            
+            // Open URL function
+            function openURL(url) {
+                if (url) {
+                    try {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    } catch (e) {
+                        // Fallback for mobile browsers
+                        window.location.href = url;
+                    }
+                }
+            }
+            
+            // Add multiple event listeners for better mobile compatibility
+            function addMobileEvents(element, handler) {
+                if (!element || !handler) return;
+                
+                element.addEventListener('click', handler, { passive: false });
+                element.addEventListener('touchend', handler, { passive: false });
+                element.addEventListener('touchstart', function(e) {
+                    element.style.transform = 'scale(0.98)';
+                }, { passive: true });
+                element.addEventListener('touchend', function(e) {
+                    setTimeout(() => {
+                        element.style.transform = '';
+                    }, 150);
+                }, { passive: true });
+            }
+            
+            // Bind toggle buttons
+            addMobileEvents(cardBtn, showCards);
+            addMobileEvents(tableBtn, showTable);
+            
+            // Handle all action buttons
+            document.addEventListener('click', function(e) {
+                const target = e.target;
+                
+                // Handle buttons with data-url attribute
+                if (target.hasAttribute('data-url')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const url = target.getAttribute('data-url');
+                    if (url) {
+                        openURL(url);
+                    }
+                    return false;
+                }
+            }, { passive: false });
+            
+            // Handle touch events for all buttons
+            document.addEventListener('touchend', function(e) {
+                const target = e.target;
+                
+                // Handle buttons with data-url attribute
+                if (target.hasAttribute('data-url')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const url = target.getAttribute('data-url');
+                    if (url) {
+                        openURL(url);
+                    }
+                    return false;
+                }
+            }, { passive: false });
+            
+            // Prevent double-tap zoom on iOS
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, { passive: false });
+            
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function() {
+                // Ensure card view is shown by default
+                showCards();
+                
+                // Add touch feedback to interactive elements
+                const interactiveElements = document.querySelectorAll('.toggle-btn, .action-btn, .table-btn');
+                
+                interactiveElements.forEach(element => {
+                    element.addEventListener('touchstart', function() {
+                        this.style.transform = 'scale(0.98)';
+                        this.style.transition = 'transform 0.1s ease';
+                    }, { passive: true });
+                    
+                    element.addEventListener('touchend', function() {
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    }, { passive: true });
+                });
+            });
+            
+            // Make functions globally available for debugging
+            window.showCards = showCards;
+            window.showTable = showTable;
+            window.openURL = openURL;
+            
+        })();
+    </script>
+</body>
+</html>
+
